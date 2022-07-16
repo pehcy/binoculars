@@ -1,5 +1,6 @@
 import websocket
 import json
+from utils.Logger import Logger
 
 '''
 Established connection to Binance Kline/Candlestick Streams
@@ -47,9 +48,7 @@ class KlineStreamer:
 
     def onMessage(self, ws, msg):
         data = json.loads(msg)
-        self.klines = data['k']
-        print(msg)
-        print(f'klines: {self.klines}')
+        Logger.log(timestamp=data['E'], klines=data['k'])
 
     def onError(self, ws, error):
         print(error)
@@ -59,3 +58,7 @@ class KlineStreamer:
 
     def start_socket(self):
         self.ws.run_forever()
+
+if __name__ == '__main__':
+    kstreamer = KlineStreamer('btcusdt', '1m')
+    kstreamer.start_socket()
