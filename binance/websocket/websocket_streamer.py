@@ -1,7 +1,13 @@
 import websocket
+import json
 
 '''
+Established connection to Binance Kline/Candlestick Streams
 references: https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#klinecandlestick-streams
+
+Usage:
+>>> kstreamer = KlineStreamer('btcusdt', '1m')
+>>> kstreamer.start_socket()
 
 result:
 {
@@ -30,25 +36,26 @@ result:
 }
 '''
 
-class WebsocketStreamer:
-    def __init__(self) -> None:
-        pass
+class KlineStreamer:
+    def __init__(self, symbol: str, interval: str) -> None:
+        websocket.enableTrace(True)
+        socketEndpoint = f'wss://stream.binance.us:9443/ws/{symbol}@kline_{interval}'
+        self.ws = websocket.WebSocketApp(socketEndpoint,
+                                    on_message=lambda ws, msg: self.onMessage(ws, msg),
+                                    on_error=lambda ws, error: self.onError(ws, error),
+                                    on_close=lambda close_msg: self.onClose(close_msg))
 
-    def onMessage(ws, msg):
+    def onMessage(self, ws, msg):
+        data = json.loads(msg)
+        self.klines = data['k']
         print(msg)
+        print(f'klines: {self.klines}')
 
-    def onError(ws, error):
+    def onError(self, ws, error):
         print(error)
 
-    def onClose(close_msg):
+    def onClose(self, close_msg):
         print(close_msg)
 
-    def streamKline(self, symbol: str, interval: str):
-        socketEndpoint = f'wss://stream.binance.us:9443/ws/{symbol}@kline_{interval}'
-        ws = websocket.WebSocketApp(socketEndpoint,
-                                    on_message=self.onMessage,
-                                    on_error=self.onError)
-        ws.run_forever()
-
     def start_socket(self):
-        self.streamKline('btcusdt', '1m')
+        self.ws.run_forever()
