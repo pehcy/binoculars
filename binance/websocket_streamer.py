@@ -58,7 +58,3 @@ class KlineStreamer:
 
     def start_socket(self):
         self.ws.run_forever()
-
-if __name__ == '__main__':
-    kstreamer = KlineStreamer('btcusdt', '1m')
-    kstreamer.start_socket()
