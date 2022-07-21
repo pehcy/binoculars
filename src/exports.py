@@ -49,14 +49,19 @@ def export_klines(symbol: str, interval, start, end, limit=5000):
     df.reset_index(drop=True, inplace=True)
     df['Opentime'] = df['Opentime'].apply(lambda x: ms_to_dt_local(x))
     
-    df.to_csv('src/data/btcusdt.csv', index=False)
+    df.to_csv(f'src/data/{symbol.lower()}.csv', index=False)
     print('CSV file has been exported. You can check inside data folder!\n')
     print(df)
 
-if __name__ == "__main__":
-    symbol = "BTCUSDT"
-    interval = '1m'
-    fromDate = int(datetime.strptime('2021-11-15', '%Y-%m-%d').timestamp() * 1000)
-    toDate = int(datetime.strptime('2021-11-16', '%Y-%m-%d').timestamp() * 1000)
+def date2int(dt):
+    return int(10000 * dt.year + 100 * dt.month + dt.day)
 
-    export_klines(symbol, interval, fromDate, toDate)
+if __name__ == "__main__":
+    symbols_list = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "LTCUSDT", "NEOUSDT", "ADAUSDT", "ETHBTC", "BNBBTC"]
+    interval = '1m'
+    #print(fromDate)
+    fromDate = int(datetime.strptime('2021-12-15 00:00:00', '%Y-%m-%d %H:%M:%S').timestamp() * 1000)
+    toDate = int(datetime.strptime('2021-12-16 00:00:00', '%Y-%m-%d %H:%M:%S').timestamp() * 1000)
+
+    for symbol in symbols_list:
+        export_klines(symbol, interval, fromDate, toDate)
