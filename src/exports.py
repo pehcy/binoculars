@@ -53,9 +53,6 @@ def export_klines(symbol: str, interval, start, end, limit=5000):
     print('CSV file has been exported. You can check inside data folder!\n')
     print(df)
 
-def date2int(dt):
-    return int(10000 * dt.year + 100 * dt.month + dt.day)
-
 if __name__ == "__main__":
     symbols_list = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "LTCUSDT", "NEOUSDT", "ADAUSDT", "ETHBTC", "BNBBTC"]
     interval = '1m'
