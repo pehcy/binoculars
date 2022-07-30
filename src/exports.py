@@ -57,8 +57,8 @@ if __name__ == "__main__":
     symbols_list = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "LTCUSDT", "NEOUSDT", "ADAUSDT", "ETHBTC", "BNBBTC"]
     interval = '1m'
     #print(fromDate)
-    fromDate = int(datetime.strptime('2021-12-15 00:00:00', '%Y-%m-%d %H:%M:%S').timestamp() * 1000)
-    toDate = int(datetime.strptime('2021-12-16 00:00:00', '%Y-%m-%d %H:%M:%S').timestamp() * 1000)
+    fromDate = int(datetime.strptime('2022-7-15 00:00:00', '%Y-%m-%d %H:%M:%S').timestamp() * 1000)
+    toDate = int(datetime.strptime('2022-7-16 00:00:00', '%Y-%m-%d %H:%M:%S').timestamp() * 1000)
 
     for symbol in symbols_list:
         export_klines(symbol, interval, fromDate, toDate)
