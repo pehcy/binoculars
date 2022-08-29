@@ -10,6 +10,7 @@ import asyncio
 from multiprocessing import Pool
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
+from multiprocessing import Pool
 
 def on_message(ws, message):
     print(str(datetime.datetime.now()) + ': ')
@@ -34,7 +35,7 @@ def stream_kline(symbol, interval):
 db.init_db()
 
 if __name__ == '__main__':
-    #pool =  Pool()
+    pool =  Pool()
     con = sqlite3.connect("streaming.db")
     df = pd.read_sql_query("SELECT * FROM Solusdt", con)
 
