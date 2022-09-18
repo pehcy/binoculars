@@ -174,6 +174,7 @@ def map_feature(X1, X2):
             out.append((X1**(i-j) * (X2**j)))
     return np.stack(out, axis=1)
 
+
 def plot_decision_boundary(ax, w, b, X, y):
     # Credit to dibgerge on Github for this plotting code
     
@@ -199,3 +200,26 @@ def plot_decision_boundary(ax, w, b, X, y):
         
         # Plot z = 0.5
         ax.contour(u,v,z, levels = [0.45], colors="g")
+
+
+def predict(X, w, b):
+    """
+    Predict whether the label is 0 (loss) or 1 (gain) using 
+    learned logistic regression on weight vector w
+
+    Args:
+    X : (ndarray Shape (m, n))
+    w : (array_like_Shape (n,))     Parameters of the model
+    b : (scalar, float)             Parameter of the model
+    
+    Returns:
+    p : (ndarray (m,1))
+        The probability for X using a threshold at 0.5
+    """
+    m, n = X.shape
+    p = np.zeros(m)
+
+    f_wb = sigmoid(np.matmul(X,w) + b)
+    p = np.where(f_wb >= 0.5, 1, 0)
+
+    return p
