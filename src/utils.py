@@ -5,6 +5,17 @@ def sigmoid(z):
     g = 1 / (1 + np.exp(np.negative(z)))
     return g
 
+def z_scaler(data):
+    """
+    Rescaling the data to reasonable interval
+
+    Arg:
+     data:  ndarray (n,)
+    """
+    mu = np.mean(data)
+    stddev = np.sqrt(np.var(data))
+    return (data - mu) / stddev
+
 def compute_cost(X, y, w, b):
     m, n = X.shape
     
@@ -162,3 +173,29 @@ def map_feature(X1, X2):
         for j in range(i + 1):
             out.append((X1**(i-j) * (X2**j)))
     return np.stack(out, axis=1)
+
+def plot_decision_boundary(ax, w, b, X, y):
+    # Credit to dibgerge on Github for this plotting code
+    
+    if X.shape[1] <= 2:
+        plot_x = np.array([min(X[:, 0]), max(X[:, 0])])
+        plot_y = (-1. / w[1]) * (w[0] * plot_x + b)
+        
+        ax.plot(plot_x, plot_y, c="b")
+        
+    else:
+        u = np.linspace(-8, 8, 200)
+        v = np.linspace(-8, 8, 200)
+        
+        z = np.zeros((len(u), len(v)))
+
+        # Evaluate z = theta*x over the grid
+        for i in range(len(u)):
+            for j in range(len(v)):
+                z[i,j] = sigmoid(np.dot(map_feature(u[i], v[j]), w) + b)
+        
+        # important to transpose z before calling contour       
+        z = z.T
+        
+        # Plot z = 0.5
+        ax.contour(u,v,z, levels = [0.45], colors="g")
