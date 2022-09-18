@@ -7,9 +7,6 @@ import pandas as pd
 import duck
 # import db
 
-import asyncio
-from multiprocessing import Pool
-
 def on_message(ws, message):
     print(str(datetime.datetime.now()) + ': ')
     print(type(message))
@@ -37,8 +34,3 @@ duck.init_duckdb()
 if __name__ == '__main__':
     print("start server")
     stream_kline('bnbbtc')
-
-    #df[cols] = np.where(df[cols] > 0, 1, 0)
-    #df['direction'] = np.where(df['log_returns'] > 0, 1, -1)
-
-    #stream_kline('SOLUSDT', '1m')

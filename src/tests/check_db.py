@@ -1,13 +1,5 @@
-import sqlite3
+import duckdb
 
-con = sqlite3.connect('streaming.db')
-cur = con.cursor()
-cmd = "select * from Solusdt"
-cur.execute(cmd)
-
-rows = cur.fetchall()
-
-for row in rows:
-    print(row)
-
-con.close()
+con = duckdb.connect("diffbook.duckdb")
+query = con.execute("SELECT * FROM ask").fetch_df()
+print(query)

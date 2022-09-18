@@ -13,10 +13,10 @@ def init_duckdb():
                     t_diff_depth (d HUGEINT, first HUGEINT, final HUGEINT)
                 ''')
     con.execute(''' CREATE TABLE IF NOT EXISTS
-                    ask (d STRING, p DOUBLE, q INTEGER)
+                    ask (d HUGEINT, p DOUBLE, q INTEGER)
                 ''')
     con.execute(''' CREATE TABLE IF NOT EXISTS
-                    bid (d STRING, p DOUBLE, q INTEGER)
+                    bid (d HUGEINT, p DOUBLE, q INTEGER)
                 ''')
 
 def log_duckdb(message: json):
@@ -30,8 +30,18 @@ def log_duckdb(message: json):
     con = duckdb.connect("diffbook.duckdb")
     cmd = {
         'insert_depth': "INSERT INTO t_diff_depth VALUES (?, ?, ?)",
-        'insert_a': "INSERT INTO t_diff_depth VALUES (?, ?, ?)"
+        'insert_a': "INSERT INTO ask VALUES (?, ?, ?)",
+        'insert_b': "INSERT INTO bid VALUES (?, ?, ?)"
     }
 
-    con.execute("INSERT INTO t_diff_depth VALUES (?, ?, ?)", [timestmp, first, last])
+    con.execute(cmd["insert_depth"], [timestmp, first, last])
+
+    if len(asks) > 0:
+        for [p, v] in asks:
+            con.execute(cmd["insert_a"], [timestmp, p, v])
+    
+    if len(bids) > 0:
+        for [p, v] in bids:
+            con.execute(cmd["insert_b"], [timestmp, p, v])
+
     print(parsed)

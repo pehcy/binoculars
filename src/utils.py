@@ -10,7 +10,6 @@ def compute_cost(X, y, w, b):
     
     z = np.matmul(X,w) + b
     f_wb = sigmoid(z)
-    # print(f_wb)
     total_cost = 0
 
     for i in range(m):
@@ -20,6 +19,7 @@ def compute_cost(X, y, w, b):
     total_cost /= m
 
     return total_cost
+
 
 def compute_gradient(X, y, w, b, lambda_=None): 
     """
@@ -47,3 +47,118 @@ def compute_gradient(X, y, w, b, lambda_=None):
     dj_dw = np.dot(1/m, np.matmul(np.transpose(X), f_wb - y))
         
     return dj_db, dj_dw
+
+
+def gradient_descent(X, y, w_in, b_in, cost_function, gradient_function, alpha, num_iters, lambda_): 
+    """
+    Performs batch gradient descent to learn theta. Updates theta by taking 
+    num_iters gradient steps with learning rate alpha
+    
+    Args:
+      X :    (array_like Shape (m, n)
+      y :    (array_like Shape (m,))
+      w_in : (array_like Shape (n,))  Initial values of parameters of the model
+      b_in : (scalar)                 Initial value of parameter of the model
+      cost_function:                  function to compute cost
+      alpha : (float)                 Learning rate
+      num_iters : (int)               number of iterations to run gradient descent
+      lambda_ (scalar, float)         regularization constant
+      
+    Returns:
+      w : (array_like Shape (n,)) Updated values of parameters of the model after
+          running gradient descent
+      b : (scalar)                Updated value of parameter of the model after
+          running gradient descent
+    """
+    
+    # number of training examples
+    m = len(X)
+    
+    # An array to store cost J and w's at each iteration primarily for graphing later
+    J_history = []
+    w_history = []
+    
+    for i in range(num_iters):
+
+        # Calculate the gradient and update the parameters
+        dj_db, dj_dw = gradient_function(X, y, w_in, b_in, lambda_)   
+
+        # Update Parameters using w, b, alpha and gradient
+        w_in = w_in - alpha * dj_dw               
+        b_in = b_in - alpha * dj_db              
+       
+        # Save cost J at each iteration
+        if i<100000:      # prevent resource exhaustion 
+            cost =  cost_function(X, y, w_in, b_in, lambda_)
+            J_history.append(cost)
+
+        # Print cost every at intervals 10 times or as many iterations if < 10
+        if i% math.ceil(num_iters/10) == 0 or i == (num_iters-1):
+            w_history.append(w_in)
+            print(f"Iteration {i:4}: Cost {float(J_history[-1]):8.2f}   ")
+        
+    return w_in, b_in, J_history, w_history #return w and J,w history for graphing
+
+
+def compute_cost_reg(X, y, w, b, lambda_ = 1):
+    """
+    Computes the cost over all examples
+    Args:
+      X : (array_like Shape (m,n)) data, m examples by n features
+      y : (array_like Shape (m,)) target value 
+      w : (array_like Shape (n,)) Values of parameters of the model      
+      b : (array_like Shape (n,)) Values of bias parameter of the model
+      lambda_ : (scalar, float)    Controls amount of regularization
+    Returns:
+      total_cost: (scalar)         cost 
+    """
+
+    m, n = X.shape
+    
+    # Calls the compute_cost function that you implemented above
+    cost_without_reg = compute_cost(X, y, w, b)
+
+    reg_cost = 0.
+    reg_cost = np.sum(np.square(w))
+    
+    # Add the regularization cost to get the total cost
+    total_cost = cost_without_reg + (lambda_/(2 * m)) * reg_cost
+
+    return total_cost
+
+
+def compute_gradient_reg(X, y, w, b, lambda_ = 1): 
+    """
+    Computes the gradient for linear regression 
+ 
+    Args:
+      X : (ndarray Shape (m,n))   variable such as house size 
+      y : (ndarray Shape (m,))    actual value 
+      w : (ndarray Shape (n,))    values of parameters of the model      
+      b : (scalar)                value of parameter of the model  
+      lambda_ : (scalar,float)    regularization constant
+    Returns
+      dj_db: (scalar)             The gradient of the cost w.r.t. the parameter b. 
+      dj_dw: (ndarray Shape (n,)) The gradient of the cost w.r.t. the parameters w. 
+
+    """
+    m, n = X.shape
+    
+    dj_db, dj_dw = compute_gradient(X, y, w, b)
+    dj_dw = dj_dw + np.dot(lambda_ / m, w)
+    
+    return dj_db, dj_dw
+
+
+def map_feature(X1, X2):
+    """
+    Map features using polynomial with degree=8 
+    """
+    X1 = np.atleast_1d(X1)
+    X2 = np.atleast_1d(X2)
+    degree = 8
+    out = []
+    for i in range(1, degree+1):
+        for j in range(i + 1):
+            out.append((X1**(i-j) * (X2**j)))
+    return np.stack(out, axis=1)
