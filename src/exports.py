@@ -56,7 +56,7 @@ def export_klines(symbol: str, interval, start, end, limit=5000):
 if __name__ == "__main__":
     symbols_list = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "LTCUSDT", "NEOUSDT", "ADAUSDT", "ETHBTC", "BNBBTC"]
     interval = '1m'
-    #print(fromDate)
+    # sample date chosen
     fromDate = int(datetime.strptime('2022-7-15 00:00:00', '%Y-%m-%d %H:%M:%S').timestamp() * 1000)
     toDate = int(datetime.strptime('2022-7-16 00:00:00', '%Y-%m-%d %H:%M:%S').timestamp() * 1000)
 

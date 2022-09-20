@@ -1,17 +1,11 @@
-import sqlite3
-import time
 import websocket
 import datetime
-import numpy as np
-import pandas as pd
 import duck
-# import db
 
 def on_message(ws, message):
     print(str(datetime.datetime.now()) + ': ')
     print(type(message))
     duck.log_duckdb(message)
-    # db.log_db(message)
 
 def on_error(ws, error):
     print(error)
