@@ -20,6 +20,10 @@ class ASmodel:
         return s - q * gamma * math.pow(sigma, 2) * (T - t)
 
     def compute_optimal_spread(self):
+        avg_spread = []
+        profit = []
+        std = []
+
         S = np.zeros((self.M+1,1))
         b = np.zeros((self.M+1,1))
         a = np.zeros((self.M+1,1))
@@ -29,14 +33,22 @@ class ASmodel:
         delta_a = np.zeros((self.M+1,1))
         q = np.zeros((self.M+1,1))
         w = np.zeros((self.M+1,1))
+        equity = np.zeros((self.M+1,1))
+        reserve_relation = np.zeros((self.M+1,1))
 
         b[0] = self.S0
+        a[0] = self.S0
+        S[0] = self.S0
         reserve_prices[0] = self.S0
-
-        z = np.random.standard_normal(200)
+        spread[0] = 0
+        delta_b[0] = 0
+        delta_a[0] = 0
+        q[0] = 0
+        w[0] = 0
+        equity[0] = 0
 
         for t in range(1, self.M+1):
-            S[t] = S[t-1] + self.sigma * math.sqrt(self.dt) * z[t]
+            S[t] = S[t-1] + self.sigma * math.sqrt(self.dt) * np.random.standard_normal()
             reserve_prices[t] = S[t] - q[t-1] * self.gamma * (self.sigma ** 2) * \
                                 (self.T - t/float(self.M))
             spread[t] = self.gamma * (self.sigma ** 2) * (self.T - t/float(self.M)) + \
@@ -44,8 +56,8 @@ class ASmodel:
             b[t] = reserve_prices[t] - 0.5 * spread[t]
             a[t] = reserve_prices[t] + 0.5 * spread[t]
 
-            delta_b = S[t] - b[t]
-            delta_a = a[t] - S[t]
+            delta_b[t] = S[t] - b[t]
+            delta_a[t] = a[t] - S[t]
 
             lambda_a = self.A * np.exp(-self.k * delta_a[t])
             prob_a = lambda_a * self.dt
@@ -55,8 +67,32 @@ class ASmodel:
             prob_b = lambda_b * self.dt
             fb = random.random()
 
-        print("result")
+            if prob_b > fb and prob_a < fa:
+                q[t] = q[t-1] + 1
+                w[t] = w[t-1] - b[t]
+            
+            if prob_b < fb and prob_a > fa:
+                q[t] = q[t-1] - 1
+                w[t] = w[t-1] + a[t]
 
-if __name__ == "__init__":
-    as_model = ASmodel(1000, 200)
-    as_model.compute_optimal_spread()
+            if prob_b < fb and prob_a < fa:
+                q[t] = q[t-1]
+                w[t] = w[t-1]
+            
+            if prob_b > fb and prob_a > fa:
+                q[t] = q[t-1]
+                w[t] = w[t-1] - b[t]
+                w[t] = w[t] + a[t]
+
+            equity[t] = w[t] + q[t] * S[t]
+
+        avg_spread.append(spread.mean())
+        profit.append(equity[-1])
+        std.append(equity[-1])
+
+        print("Results: \n")
+        print(profit)
+        print("%14s %20.5f" % ("Average spread: ", np.array(avg_spread).mean()))
+
+as_model = ASmodel(1000, 200)
+as_model.compute_optimal_spread()
