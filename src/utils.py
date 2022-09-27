@@ -133,7 +133,8 @@ def compute_cost_reg(X, y, w, b, lambda_ = 1):
     reg_cost = np.sum(np.square(w))
     
     # Add the regularization cost to get the total cost
-    total_cost = cost_without_reg + (lambda_/(2 * m)) * reg_cost
+    total_cost = cost_without_reg
+    #total_cost = cost_without_reg + (lambda_/(2 * m)) * reg_cost
 
     return total_cost
 
@@ -156,7 +157,7 @@ def compute_gradient_reg(X, y, w, b, lambda_ = 1):
     m, n = X.shape
     
     dj_db, dj_dw = compute_gradient(X, y, w, b)
-    dj_dw = dj_dw + np.dot(lambda_ / m, w)
+    # dj_dw = dj_dw + np.dot(lambda_ / m, w)
     
     return dj_db, dj_dw
 
