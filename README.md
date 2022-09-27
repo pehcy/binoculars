@@ -17,3 +17,4 @@ This repository is for educational purposes only.
 - [x] DuckDB setup
 - [ ] Order Book
 - [ ] Testing
+- [ ] Microservices (Flask)
