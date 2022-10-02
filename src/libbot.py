@@ -6,6 +6,10 @@ RSI_PERIOD = 28
 RSI_OVERBOUGHT = 70
 RSI_OVERSOLD = 30
 
+# Splitting dataframe into blocks
+def split_blocks(data: pd.Series, size: int) -> list:
+    return [compute_rsi(data.iloc[i:size+i]) for i in range(0, len(data), size)]
+
 def compute_rsi(data: pd.Series):
     gain = np.extract(data > 0, data)
     loss = np.extract(data < 0, data)
