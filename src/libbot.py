@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from typing import Callable
+import os
 
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 70
@@ -21,17 +22,8 @@ def compute_macd(price: pd.Series, slow: int, fast: int, signal_len: int):
     macd = ewma_long - ewma_short
     signal = macd.ewm(span=signal_len, adjust=False).mean()
     hist = macd - signal
-    df = pd.concat([macd, signal, hist], join='inner', axis=1)
+    df = pd.concat([macd, signal, hist], join='inner', keys=['macd', 'signal', 'hist'], axis=1)
     return df
-
-# compute exponential moving average
-def compute_ema(data: pd.Series):
-    n = len(data)
-    alpha = 2 / (1 + n)
-    w = [(1 - alpha) ** i for i in range(n)]
-
-    ema = np.dot(w, data) / np.sum(w)
-    return ema
 
 def compute_rsi(data: pd.Series):
     gain = np.extract(data > 0, data)
@@ -55,16 +47,85 @@ def compute_rsi_next(temp_gain, temp_loss, current_gain, current_loss, step):
     wavg_loss = (temp_loss * step) + current_loss
     return 100 - 100 / (1 + wavg_gain / wavg_loss)
 
-def plot_run_chart():
+# plot macd
+def plot_macd(
+        prices: pd.Series, 
+        macd: pd.Series, 
+        signal: pd.Series, 
+        hist: pd.Series,
+        buy: pd.Series,
+        sell: pd.Series
+    ):
+    plt.style.use('fivethirtyeight')
+    ax1 = plt.subplot2grid((8,1), (0,0), rowspan = 5, colspan = 1)
+    ax2 = plt.subplot2grid((8,1), (5,0), rowspan = 3, colspan = 1)
+    ax1.plot(prices.index, buy, marker = '^', color = 'green', \
+        markersize = 10, label = 'BUY SIGNAL', linewidth = 0)
+    ax1.plot(prices.index, sell, marker = 'v', color = 'red', \
+        markersize = 10, label = 'BUY SIGNAL', linewidth = 0)
+
+    ax1.plot(prices, linewidth = 2)
+    ax2.plot(macd, color = 'grey', linewidth = 1.5, label = 'MACD')
+    ax2.plot(signal, color = 'skyblue', linewidth = 1.5, label = 'SIGNAL')
+
+    for i in range(len(prices)):
+        if hist[i] < 0:
+            ax2.bar(prices.index[i], hist[i], color = '#ef5350')
+        else:
+            ax2.bar(prices.index[i], hist[i], color = '#26a69a')
+    plt.legend(loc='lower right')
+
+def rsi_strategy(rsi):
     return
 
-def rsi_strategy():
-    return
+def macd_strategy(prices, data):
+    buy = []
+    sell = []
+    macd_signal = []
+    signal = 0
+
+    for i in range(len(data)):
+        if data['macd'][i] > data['signal'][i]:
+            if signal != 1:
+                buy.append(prices[i])
+                sell.append(np.nan)
+                signal = 1
+                macd_signal.append(signal)
+            else:
+                buy.append(np.nan)
+                sell.append(np.nan)
+                macd_signal.append(0)
+        elif data['macd'][i] < data['signal'][i]:
+            if signal != -1:
+                buy.append(np.nan)
+                sell.append(prices[i])
+                signal = -1
+                macd_signal.append(signal)
+            else:
+                buy.append(np.nan)
+                sell.append(np.nan)
+                macd_signal.append(0)
+        else:
+            buy.append(np.nan)
+            sell.append(np.nan)
+            macd_signal.append(0)
+
+    return buy, sell, macd_signal
+
 
 if __name__ == '__main__':
-    df = pd.read_csv('../src/data/btcusdt.csv')
+    df = pd.read_csv(os.path.join(os.getcwd(), 'src/data/btcusdt.csv'))
+
     df['returns'] = df['Close'] - df['Close'].shift(-1)
     df.dropna(inplace=True)
-    rsi_windows = np.array(run_blocks(df['returns'], 28))
-    plt.plot(rsi_windows)
+
+    # Sample of BTC/USDT close price from time 0 to 200
+    sample_close_prices = df['Close'].iloc[0:200]
+
+    fr_macd = compute_macd(sample_close_prices, INIT_LONG_EMA, INIT_SHORT_EMA, INIT_SIGNAL_EMA)
+    
+    print('Calculating MACD...')
+    buy_prices, sell_prices, macd_signal = macd_strategy(df['Close'].iloc[0:200], fr_macd)
+    plot_macd(sample_close_prices, fr_macd['macd'], fr_macd['signal'], \
+        fr_macd['hist'], buy_prices, sell_prices)
     plt.show()
