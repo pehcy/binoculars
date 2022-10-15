@@ -1,3 +1,4 @@
+from turtle import position
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -17,10 +18,10 @@ def run_blocks(data: pd.Series, size: int, func: Callable) -> list:
     return np.array([func(data.iloc[i:size+i]) for i in range(0, len(data), size)])
 
 def compute_macd(price: pd.Series, slow: int, fast: int, signal_len: int):
-    ewma_long = price.ewm(span=slow, adjust=False).mean()
-    ewma_short = price.ewm(span=fast, adjust=False).mean()
-    macd = ewma_long - ewma_short
-    signal = macd.ewm(span=signal_len, adjust=False).mean()
+    ewma_slow = price.ewm(span=slow, adjust=False, min_periods=slow).mean()
+    ewma_fast = price.ewm(span=fast, adjust=False, min_periods=fast).mean()
+    macd = ewma_fast - ewma_slow
+    signal = macd.ewm(span=signal_len, adjust=False, min_periods=signal_len).mean()
     hist = macd - signal
     df = pd.concat([macd, signal, hist], join='inner', keys=['macd', 'signal', 'hist'], axis=1)
     return df
@@ -112,20 +113,38 @@ def macd_strategy(prices, data):
 
     return buy, sell, macd_signal
 
+def create_position(close_prices, macd_signal):
+    position = []
+    for i in range(len(macd_signal)):
+        if macd_signal[i] > 1:
+            position.append(0)
+        else:
+            position.append(1)
+    
+    for i in range(len(close_prices)):
+        if macd_signal[i] == 1:
+            position[i] = 1
+        elif macd_signal[i] == -1:
+            position[i] = 0
+        else:
+            position[i] = position[i-1]
+
+    return position
+
 
 if __name__ == '__main__':
-    df = pd.read_csv(os.path.join(os.getcwd(), 'src/data/btcusdt.csv'))
+    df = pd.read_csv(os.path.join(os.getcwd(), 'src/data/adausdt.csv'))
 
     df['returns'] = df['Close'] - df['Close'].shift(-1)
     df.dropna(inplace=True)
 
     # Sample of BTC/USDT close price from time 0 to 200
-    sample_close_prices = df['Close'].iloc[0:200]
+    sample_close_prices = df['Close']
 
     fr_macd = compute_macd(sample_close_prices, INIT_LONG_EMA, INIT_SHORT_EMA, INIT_SIGNAL_EMA)
     
     print('Calculating MACD...')
-    buy_prices, sell_prices, macd_signal = macd_strategy(df['Close'].iloc[0:200], fr_macd)
+    buy_prices, sell_prices, macd_signal = macd_strategy(df['Close'], fr_macd)
     plot_macd(sample_close_prices, fr_macd['macd'], fr_macd['signal'], \
         fr_macd['hist'], buy_prices, sell_prices)
     plt.show()

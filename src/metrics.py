@@ -6,8 +6,8 @@ def get_pnl(gain, loss):
     """
     return np.mean(gain) / np.mean(loss)
 
-def get_sharpe_ratio():
-    return
+def get_sharpe_ratio(gain, risk_free_interest_rate):
+    return (np.mean(gain) - risk_free_interest_rate) / np.std(gain)
 
-def get_sortino():
+def get_sortino_ratio():
     return

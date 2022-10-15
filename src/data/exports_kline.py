@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
     for single_date in daterange(start_date, end_date):
         next_day = single_date + timedelta(1)
-        export_klines(symbols_list[5], interval, \
+        export_klines(symbols_list[0], interval, \
             int(single_date.timestamp() * 1000), \
             int(next_day.timestamp() * 1000), \
             show_date=True)

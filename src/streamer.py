@@ -16,7 +16,7 @@ def on_close(close_msg):
 def stream_kline(symbol: str):
     websocket.enableTrace(False)
     # socket = f'wss://stream.binance.com:9443/ws/{symbol.lower()}@kline_{interval}'
-    socket = f'wss://stream.binance.com:9443/ws/{symbol.lower()}@depth'
+    socket = f'wss://stream.binance.com:9443/ws/{symbol.lower()}@depth5'
     ws = websocket.WebSocketApp(socket,
                                 on_message=on_message,
                                 on_error=on_error,
