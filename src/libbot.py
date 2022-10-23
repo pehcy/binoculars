@@ -13,10 +13,6 @@ INIT_SHORT_EMA = 12
 INIT_LONG_EMA = 26
 INIT_SIGNAL_EMA = 9
 
-# Split dataframe into several blocks then apply function on them
-def run_blocks(data: pd.Series, size: int, func: Callable) -> list:
-    return np.array([func(data.iloc[i:size+i]) for i in range(0, len(data), size)])
-
 def compute_macd(price: pd.Series, slow: int, fast: int, signal_len: int):
     ewma_slow = price.ewm(span=slow, adjust=False, min_periods=slow).mean()
     ewma_fast = price.ewm(span=fast, adjust=False, min_periods=fast).mean()
@@ -25,16 +21,6 @@ def compute_macd(price: pd.Series, slow: int, fast: int, signal_len: int):
     hist = macd - signal
     df = pd.concat([macd, signal, hist], join='inner', keys=['macd', 'signal', 'hist'], axis=1)
     return df
-
-def compute_rsi(data: pd.Series):
-    gain = np.extract(data > 0, data)
-    loss = np.extract(data < 0, data)
-
-    avg_gain = np.mean(gain)
-    avg_loss = np.mean(np.absolute(loss))
-
-    result = 100 - 100 / (1 + avg_gain / avg_loss)
-    return result
 
 # second step for RSI calculation
 def compute_rsi_next(temp_gain, temp_loss, current_gain, current_loss, step):
