@@ -168,7 +168,7 @@ def map_feature(X1, X2):
     """
     X1 = np.atleast_1d(X1)
     X2 = np.atleast_1d(X2)
-    degree = 8
+    degree = 10
     out = []
     for i in range(1, degree+1):
         for j in range(i + 1):
