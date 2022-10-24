@@ -119,7 +119,7 @@ def create_position(close_prices, macd_signal):
 
 
 if __name__ == '__main__':
-    df = pd.read_csv(os.path.join(os.getcwd(), 'src/data/adausdt.csv'))
+    df = pd.read_csv(os.path.join(os.getcwd(), 'src/data/adausdt_2020.csv'))
 
     df['returns'] = df['Close'] - df['Close'].shift(-1)
     df.dropna(inplace=True)
