@@ -1,3 +1,4 @@
+import numbers
 from turtle import position
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -23,16 +24,19 @@ def compute_macd(price: pd.Series, slow: int, fast: int, signal_len: int):
     return df
 
 # second step for RSI calculation
-def compute_rsi_next(temp_gain, temp_loss, current_gain, current_loss, step):
-    """
-     temp_gain:     the average gain from previous window, type: float64
-     temp_gain:     the average loss from previous window, should be positive numbers
-     step:          number of period(or lag) for rolling RSI
-    """
-    
-    wavg_gain = (temp_gain * step) + current_gain
-    wavg_loss = (temp_loss * step) + current_loss
-    return 100 - 100 / (1 + wavg_gain / wavg_loss)
+def get_rsi(df: pd.DataFrame):
+    rets = df['Close'].diff()
+    rsi_df = pd.DataFrame(index=df.index)
+    rsi_df['down'] = np.where(rets < 0, rets, 0)
+    rsi_df['up'] = np.where(rets >= 0, rets, 0)
+
+    ma_down = rsi_df['down'].rolling(14).mean()
+    ma_up = rsi_df['up'].rolling(14).mean()
+    rs = ma_up / np.abs(ma_down)
+    rsi_list = 100 * rs / (1 + rs)
+
+    return rsi_list
+
 
 # plot macd
 def plot_macd(
@@ -62,9 +66,6 @@ def plot_macd(
             ax2.bar(prices.index[i], hist[i], color = '#26a69a')
     plt.legend(loc='lower right')
 
-def rsi_strategy(rsi):
-    return
-
 def macd_strategy(prices, data):
     buy = []
     sell = []
@@ -72,7 +73,7 @@ def macd_strategy(prices, data):
     signal = 0
 
     for i in range(len(data)):
-        if data['macd'][i] > data['signal'][i]:
+        if data['macd'][i] > data['signal'][i] and data['rsi'][i-1] <= 35:
             if signal != 1:
                 buy.append(prices[i])
                 sell.append(np.nan)
@@ -82,7 +83,7 @@ def macd_strategy(prices, data):
                 buy.append(np.nan)
                 sell.append(np.nan)
                 macd_signal.append(0)
-        elif data['macd'][i] < data['signal'][i]:
+        elif data['macd'][i] < data['signal'][i] and data['rsi'][i-1] >= 70:
             if signal != -1:
                 buy.append(np.nan)
                 sell.append(prices[i])
@@ -119,7 +120,7 @@ def create_position(close_prices, macd_signal):
 
 
 if __name__ == '__main__':
-    df = pd.read_csv(os.path.join(os.getcwd(), 'src/data/adausdt_2020.csv'))
+    df = pd.read_csv(os.path.join(os.getcwd(), 'src/data/adausdt_2021.csv'))
 
     df['returns'] = df['Close'] - df['Close'].shift(-1)
     df.dropna(inplace=True)
@@ -128,7 +129,9 @@ if __name__ == '__main__':
     sample_close_prices = df['Close']
 
     fr_macd = compute_macd(sample_close_prices, INIT_LONG_EMA, INIT_SHORT_EMA, INIT_SIGNAL_EMA)
-    
+    fr_macd['rsi'] = get_rsi(df)
+    print(fr_macd)
+
     print('Calculating MACD...')
     buy_prices, sell_prices, macd_signal = macd_strategy(df['Close'], fr_macd)
     plot_macd(sample_close_prices, fr_macd['macd'], fr_macd['signal'], \

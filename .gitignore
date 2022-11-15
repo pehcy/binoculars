@@ -1,3 +1,4 @@
 __pycache__
 *.duckdb
 *.db
+.ipynb_checkpoints
