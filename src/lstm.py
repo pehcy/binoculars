@@ -1,12 +1,5 @@
-import pandas as pd
-import numpy as np
-from sklearn.preprocessing import MinMaxScaler
-
 import tensorflow as tf
-from keras.layers import Bidirectional, Dense, Dropout, LSTM 
-
-import os
-import matplotlib.pyplot as plt
+from keras.layers import Bidirectional, Dense, Dropout, LSTM
 
 class EarlyStopping(tf.keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs={}):

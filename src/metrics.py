@@ -9,8 +9,8 @@ def get_pnl(gain, loss):
 def get_sharpe_ratio(gain, risk_free_interest_rate):
     return (np.mean(gain) - risk_free_interest_rate) / np.std(gain)
 
-def get_sortino_ratio():
-    return
+def get_sortino_ratio(gain, risk_free_interest_rate):
+    return (np.mean(gain) - risk_free_interest_rate) / np.std(gain)
 
 def hausdorff_distance(actual, predict):
     a = (actual['Open'] + actual['Close']) / 2 \

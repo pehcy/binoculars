@@ -120,7 +120,6 @@ class MACDStrategy:
     
     def get_return_rates(self, investment_value):
         cp_returns = np.diff(self.prices)
-        print(cp_returns[-1])
         num_of_stocks = np.floor(investment_value / self.prices[0])
         strategy_ret = []
 
@@ -128,19 +127,6 @@ class MACDStrategy:
             returns = cp_returns[i] * self.position[i] * num_of_stocks
             strategy_ret.append(returns)
         
-        print(np.sum(strategy_ret))
         total_investment = round(np.sum(strategy_ret), 2)
         profit_percentage = np.floor((total_investment / investment_value) * 100)
         return total_investment, profit_percentage
-
-if __name__ == '__main__':
-    df = pd.read_csv(os.path.join(os.getcwd(), 'src/data/adausdt_2022.csv'))
-
-    # Sample of BTC/USDT close price from time 0 to 200
-    sample_close_prices = df['Close']
-    macd_bot = MACDStrategy(sample_close_prices)
-    total, rate = macd_bot.get_return_rates(investment_value=1e5)
-    print(f'Total investment: {total}')
-    print(f'Total percentage: {rate}')
-    macd_bot.plot_macd()
-    

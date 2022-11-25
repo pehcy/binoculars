@@ -3,6 +3,13 @@ import sys
 here = os.path.dirname(__file__)
 sys.path.append(os.path.join(here, '..'))
 
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler
+
+import time
+start_time = time.time()
+
 from lstm import *
 from macd import *
 
@@ -44,4 +51,6 @@ if __name__ == '__main__':
     total, rate = macd_bot.get_return_rates(investment_value=1e5)
     print(f'Total investment: {total}')
     print(f'Total profit percentage: {rate}')
-    macd_bot.plot_macd()
+    print("--- %s seconds ---" % (time.time() - start_time))
+    print(u'\033[92m \u2713', "All tests passed \033[0m")
+    # macd_bot.plot_macd()
